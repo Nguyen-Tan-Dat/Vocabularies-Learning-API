@@ -1,0 +1,137 @@
+# Project Structure for Vocabulary Learning API
+
+## Root Structure
+```
+├── cmd
+│   └── main.go
+├── config
+│   └── config.go
+├── db
+│   ├── database.go
+│   ├── migrations
+│   │   └── migrate.go
+├── graph
+│   ├── schema.graphqls
+│   ├── generated
+│   │   └── generated.go
+│   ├── resolvers
+│   │   ├── topic_resolver.go
+│   │   ├── vocabulary_resolver.go
+│   │   └── resolver.go
+├── internal
+│   ├── repositories
+│   │   ├── topic_repository.go
+│   │   └── vocabulary_repository.go
+│   ├── services
+│   │   ├── topic_service.go
+│   │   └── vocabulary_service.go
+├── models
+│   └── models.go
+├── go.mod
+├── go.sum
+└── README.md
+```
+
+---
+
+## Directory Details
+
+### cmd
+This directory contains the entry point of the application.
+- **`main.go`**: Initializes dependencies and starts the server.
+
+### config
+This directory is for application configuration, such as environment variables or shared settings.
+- **`config.go`**: Loads and provides configuration settings (e.g., database connection strings, API ports).
+
+### db
+This directory handles database connectivity and migrations.
+- **`database.go`**: Manages database initialization and connection pooling.
+- **`migrations`**: Handles database schema migrations.
+  - **`migrate.go`**: Scripts for setting up or updating the database schema.
+
+### graph
+This directory contains GraphQL-related files.
+- **`schema.graphqls`**: The GraphQL schema definition.
+- **`generated`**: Auto-generated code by gqlgen.
+- **`resolvers`**: Contains resolver implementations for GraphQL operations.
+  - **`topic_resolver.go`**: Handles Topic-related GraphQL operations.
+  - **`vocabulary_resolver.go`**: Handles Vocabulary-related GraphQL operations.
+  - **`resolver.go`**: Main resolver struct for dependency injection.
+
+### internal
+This directory encapsulates application-specific business logic and data handling.
+
+#### repositories
+This subdirectory handles data access logic.
+- **`topic_repository.go`**: Database operations for topics.
+- **`vocabulary_repository.go`**: Database operations for vocabularies.
+
+#### services
+This subdirectory contains business logic.
+- **`topic_service.go`**: Business rules for managing topics.
+- **`vocabulary_service.go`**: Business rules for managing vocabularies.
+
+### models
+This directory defines data models shared across the application.
+- **`models.go`**: Contains model definitions for entities like `Topic` and `Vocabulary`.
+
+---
+
+## Example Dependency Injection in `main.go`
+
+```go
+package main
+
+import (
+	"log"
+	"net/http"
+
+	"github.com/99designs/gqlgen/graphql/handler"
+	"github.com/99designs/gqlgen/graphql/playground"
+
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/config"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/db"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/resolvers"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/internal/repositories"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/internal/services"
+)
+
+func main() {
+	// Load configuration
+	cfg := config.LoadConfig()
+
+	// Initialize database
+	dbInstance := db.NewDatabase(cfg.DatabaseURL)
+
+	// Initialize repositories
+	topicRepo := repositories.NewTopicRepository(dbInstance)
+	vocabRepo := repositories.NewVocabularyRepository(dbInstance)
+
+	// Initialize services
+	topicService := services.NewTopicService(topicRepo)
+	vocabService := services.NewVocabularyService(vocabRepo)
+
+	// Initialize resolvers
+	resolver := &resolvers.Resolver{
+		TopicService:      topicService,
+		VocabularyService: vocabService,
+	}
+
+	// Create GraphQL server
+	srv := handler.NewDefaultServer(graph.NewExecutableSchema(graph.Config{Resolvers: resolver}))
+
+	// Setup HTTP handlers
+	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/query", srv)
+
+	// Start server
+	log.Printf("connect to http://localhost:%s/ for GraphQL playground", cfg.Port)
+	log.Fatal(http.ListenAndServe(":"+cfg.Port, nil))
+}
+```
+
+---
+
+This structure adheres to clean architecture principles, separating concerns between layers like GraphQL handling, business logic, and data access.
