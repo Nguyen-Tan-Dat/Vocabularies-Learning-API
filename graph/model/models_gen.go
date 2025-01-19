@@ -5,22 +5,21 @@ package model
 type Mutation struct {
 }
 
+type NewTopic struct {
+	Name   string `json:"name"`
+	UserID int32  `json:"userId"`
+}
+
 type Query struct {
 }
 
-type Subscription struct {
-}
-
 type Topic struct {
-	ID           string        `json:"id"`
-	Name         string        `json:"name"`
-	Vocabularies []*Vocabulary `json:"vocabularies,omitempty"`
+	ID     int32  `json:"id"`
+	Name   string `json:"name"`
+	UserID int32  `json:"userId"`
 }
 
-type Vocabulary struct {
-	ID       string   `json:"id"`
-	Word     string   `json:"word"`
-	Phonetic *string  `json:"phonetic,omitempty"`
-	Meaning  *string  `json:"meaning,omitempty"`
-	Topics   []*Topic `json:"topics,omitempty"`
+type UpdateTopicInput struct {
+	ID   int32   `json:"id"`
+	Name *string `json:"name,omitempty"`
 }

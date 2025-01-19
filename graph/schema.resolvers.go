@@ -6,98 +6,89 @@ package graph
 
 import (
 	"context"
+	"errors"
 	"fmt"
+	"gorm.io/gorm"
+	"log"
 
-	"github.com/Nguyen-Tan-Dat/Vocabualries-Learning-API/graph/model"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/model"
 )
 
-// Mutation resolver: tạo một từ vựng mới
-func (r *mutationResolver) CreateVocabulary(ctx context.Context, word string, phonetic *string, meaning string, topicIds []string) (*model.Vocabulary, error) {
-	vocabulary, err := r.client.Vocabulary.
-		Create().
-		SetWord(input.Word).
-		SetPhonetic(input.Phonetic).
-		SetMeaning(input.Meaning).
-		Save(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to create vocabulary: %v", err)
+func (r *mutationResolver) CreateTopic(ctx context.Context, input model.NewTopic) (*model.Topic, error) {
+	// Kiểm tra xem topic đã tồn tại chưa
+	var existingTopic model.Topic
+	err := r.DB.Where("name = ? AND user_id = ?", input.Name, input.UserID).First(&existingTopic).Error
+	if err == nil {
+		log.Printf("Topic already exists for user %d with name %s", input.UserID, input.Name)
+		return nil, fmt.Errorf("topic with name '%s' already exists for user %d", input.Name, input.UserID)
+	} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+		log.Println("Failed to check topic existence:", err)
+		return nil, err
 	}
-	return vocabulary, nil
-}
 
-// CreateTopic is the resolver for the createTopic field.
-func (r *mutationResolver) CreateTopic(ctx context.Context, name string, userID string) (*model.Topic, error) {
-	panic(fmt.Errorf("not implemented: CreateTopic - createTopic"))
-}
-
-// Mutation resolver: cập nhật từ vựng
-func (r *mutationResolver) UpdateVocabulary(ctx context.Context, id string, word *string, phonetic *string, meaning *string, topicIds []string) (*model.Vocabulary, error) {
-	vocabulary, err := r.client.Vocabulary.
-		UpdateOneID(id).
-		SetWord(input.Word).
-		SetPhonetic(input.Phonetic).
-		SetMeaning(input.Meaning).
-		Save(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to update vocabulary: %v", err)
+	topic := model.Topic{
+		Name:   input.Name,
+		UserID: input.UserID,
 	}
-	return vocabulary, nil
+
+	if err := r.DB.Create(&topic).Error; err != nil {
+		log.Println("Failed to create topic:", err)
+		return nil, err
+	}
+
+	return &topic, nil
 }
 
 // UpdateTopic is the resolver for the updateTopic field.
-func (r *mutationResolver) UpdateTopic(ctx context.Context, id string, name *string) (*model.Topic, error) {
-	panic(fmt.Errorf("not implemented: UpdateTopic - updateTopic"))
+func (r *mutationResolver) UpdateTopic(ctx context.Context, input model.UpdateTopicInput) (*model.Topic, error) {
+	// Tìm topic cần cập nhật theo ID
+	var topic model.Topic
+	if err := r.DB.First(&topic, input.ID).Error; err != nil {
+		log.Println("Topic not found:", err)
+		return nil, err
+	}
+
+	// Cập nhật các trường nếu input không phải nil
+	if input.Name != nil {
+		topic.Name = *input.Name
+	}
+
+	// Lưu thay đổi vào database
+	if err := r.DB.Save(&topic).Error; err != nil {
+		log.Println("Failed to update topic:", err)
+		return nil, err
+	}
+
+	return &topic, nil
 }
 
-// Mutation resolver: xóa từ vựng
-func (r *mutationResolver) DeleteVocabulary(ctx context.Context, id string) (*bool, error) {
-	err := r.client.Vocabulary.DeleteOneID(id).Exec(ctx)
-	if err != nil {
-		return false, fmt.Errorf("failed to delete vocabulary: %v", err)
+// DeleteTopic is the resolver for the deleteTopic field.
+func (r *mutationResolver) DeleteTopic(ctx context.Context, id int32) (bool, error) {
+	if err := r.DB.Delete(&model.Topic{}, id).Error; err != nil {
+		log.Println("Failed to delete topic:", err)
+		return false, err
 	}
 	return true, nil
 }
 
-// DeleteTopic is the resolver for the deleteTopic field.
-func (r *mutationResolver) DeleteTopic(ctx context.Context, id string) (*bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteTopic - deleteTopic"))
-}
-
-// Query resolver: lấy tất cả từ vựng theo topic
-func (r *queryResolver) Vocabularies(ctx context.Context, topic *string) ([]*model.Vocabulary, error) {
-	vocabularies, err := r.client.Vocabulary.
-		Query().
-		All(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch vocabularies: %v", err)
-	}
-	return vocabularies, nil
-}
-
-// Query resolver: lấy tất cả các topic
-func (r *queryResolver) Topics(ctx context.Context) ([]*model.Topic, error) {
-	topics, err := r.client.Topic.
-		Query().
-		All(ctx)
-	if err != nil {
-		return nil, fmt.Errorf("failed to fetch topics: %v", err)
+// GetTopics is the resolver for the getTopics field.
+func (r *queryResolver) GetTopics(ctx context.Context, userID int32) ([]*model.Topic, error) {
+	var topics []*model.Topic
+	if err := r.DB.Where("user_id = ?", userID).Find(&topics).Error; err != nil {
+		log.Println("Failed to fetch topics:", err)
+		return nil, err
 	}
 	return topics, nil
 }
 
-// VocabularyCreated is the resolver for the vocabularyCreated field.
-func (r *subscriptionResolver) VocabularyCreated(ctx context.Context) (<-chan *model.Vocabulary, error) {
-	panic(fmt.Errorf("not implemented: VocabularyCreated - vocabularyCreated"))
-}
-
-// VocabularyUpdated is the resolver for the vocabularyUpdated field.
-func (r *subscriptionResolver) VocabularyUpdated(ctx context.Context) (<-chan *model.Vocabulary, error) {
-	panic(fmt.Errorf("not implemented: VocabularyUpdated - vocabularyUpdated"))
-}
-
-// VocabularyDeleted is the resolver for the vocabularyDeleted field.
-func (r *subscriptionResolver) VocabularyDeleted(ctx context.Context) (<-chan *string, error) {
-	panic(fmt.Errorf("not implemented: VocabularyDeleted - vocabularyDeleted"))
+// GetTopicByID is the resolver for the getTopicById field.
+func (r *queryResolver) GetTopicByID(ctx context.Context, id int32) (*model.Topic, error) {
+	var topic model.Topic
+	if err := r.DB.First(&topic, id).Error; err != nil {
+		log.Println("Failed to fetch topic by ID:", err)
+		return nil, err
+	}
+	return &topic, nil
 }
 
 // Mutation returns MutationResolver implementation.
@@ -106,9 +97,5 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 // Query returns QueryResolver implementation.
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 
-// Subscription returns SubscriptionResolver implementation.
-func (r *Resolver) Subscription() SubscriptionResolver { return &subscriptionResolver{r} }
-
 type mutationResolver struct{ *Resolver }
 type queryResolver struct{ *Resolver }
-type subscriptionResolver struct{ *Resolver }
