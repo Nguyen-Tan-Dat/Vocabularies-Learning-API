@@ -13,14 +13,14 @@ input UpdateTopicInput {
     id: Int!
     name: String
 }
+ type Query {
+    getTopics: [Topic!]!
+    getTopicById(id: Int!): Topic
+}
 
-type Mutation {
+ type Mutation {
     createTopic(input: NewTopic!): Topic!
     updateTopic(input: UpdateTopicInput!): Topic!
     deleteTopic(id: Int!): Boolean!
 }
 
-type Query {
-    getTopics(userId: Int!): [Topic!]!
-    getTopicById(id: Int!): Topic
-}

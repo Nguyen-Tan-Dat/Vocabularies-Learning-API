@@ -1,0 +1,36 @@
+type English {
+    id: Int!
+    word: String!
+    definition: String
+    partOfSpeech: String
+    example: String
+    userId: Int!
+}
+
+input NewEnglishInput {
+    word: String!
+    definition: String
+    partOfSpeech: String
+    example: String
+    userId: Int!
+}
+
+input UpdateEnglishInput {
+    id: Int!
+    word: String
+    definition: String
+    partOfSpeech: String
+    example: String
+}
+
+extend type Mutation {
+    createEnglish(input: NewEnglishInput!): English!
+    updateEnglish(input: UpdateEnglishInput!): English!
+    deleteEnglish(id: Int!): Boolean!
+}
+
+extend type Query {
+    getEnglish(id: Int!): English
+    listEnglish(userId: Int!): [English!]!
+}
+

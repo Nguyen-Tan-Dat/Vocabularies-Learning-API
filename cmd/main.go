@@ -1,36 +1,35 @@
 package main
 
 import (
-	"gorm.io/driver/postgres"
-	"gorm.io/gorm"
-	"log"
-	"net/http"
-	"os"
-
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
 	"github.com/99designs/gqlgen/graphql/handler/transport"
 	"github.com/99designs/gqlgen/graphql/playground"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/db"
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/resolvers"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/middleware"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/repositories"
+	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/services"
 	"github.com/vektah/gqlparser/v2/ast"
+	"log"
+	"net/http"
+	"os"
 )
 
-var db *gorm.DB
+//var db *gorm.DB
 
 func main() {
 	port := os.Getenv("PORT")
 	if port == "" {
-		port = "8080"
+		port = "8081"
 	}
-	var err error
-	dsn := "host=localhost user=postgres password=CpqaFVYJ9Mkz6pOj dbname=vocabularies_learning port=5432 sslmode=disable"
-	db, err = gorm.Open(postgres.Open(dsn), &gorm.Config{})
-	if err != nil {
-		log.Fatal("Failed to connect to database:", err)
-	}
+	db.ConnectDatabase()
+	topicService := services.TopicService{Repo: repositories.TopicRepository{DB: db.GetDB()}}
+	resolver := resolvers.Resolver{TopicService: topicService}
 
-	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{DB: db}}))
+	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver}))
 
 	srv.AddTransport(transport.Options{})
 	srv.AddTransport(transport.GET{})
@@ -42,9 +41,9 @@ func main() {
 	srv.Use(extension.AutomaticPersistedQuery{
 		Cache: lru.New[string](100),
 	})
-
+	// Add middleware
+	http.Handle("/query", middleware.JWTMiddleware(srv))
 	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
-	http.Handle("/query", srv)
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))
