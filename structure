@@ -4,12 +4,8 @@
 ```
 ├── cmd
 │   └── main.go
-├── config
-│   └── config.go
 ├── db
 │   ├── database.go
-│   ├── migrations
-│   │   └── migrate.go
 ├── graph
 │   ├── schema.graphqls
 │   ├── generated
@@ -31,6 +27,7 @@
 ├── go.sum
 └── README.md
 ```
+ go run github.com/99designs/gqlgen generate
 
 ---
 

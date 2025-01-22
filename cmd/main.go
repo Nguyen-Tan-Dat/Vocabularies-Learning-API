@@ -42,8 +42,8 @@ func main() {
 		Cache: lru.New[string](100),
 	})
 	// Add middleware
-	http.Handle("/query", middleware.JWTMiddleware(srv))
-	http.Handle("/", playground.Handler("GraphQL playground", "/query"))
+	http.Handle("/graphql", middleware.JWTMiddleware(srv))
+	http.Handle("/", playground.Handler("GraphQL playground", "/graphql"))
 
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)
 	log.Fatal(http.ListenAndServe(":"+port, nil))

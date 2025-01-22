@@ -7,7 +7,7 @@ package resolvers
 import (
 	"context"
 	"fmt"
-	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph"
+
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/model"
 )
 
@@ -39,12 +39,3 @@ func (r *queryResolver) GetTopics(ctx context.Context) ([]*model.Topic, error) {
 func (r *queryResolver) GetTopicByID(ctx context.Context, id int32) (*model.Topic, error) {
 	panic(fmt.Errorf("not implemented: GetTopicByID - getTopicById"))
 }
-
-// Mutation returns graph.MutationResolver implementation.
-func (r *Resolver) Mutation() graph.MutationResolver { return &mutationResolver{r} }
-
-// Query returns graph.QueryResolver implementation.
-func (r *Resolver) Query() graph.QueryResolver { return &queryResolver{r} }
-
-type mutationResolver struct{ *Resolver }
-type queryResolver struct{ *Resolver }
