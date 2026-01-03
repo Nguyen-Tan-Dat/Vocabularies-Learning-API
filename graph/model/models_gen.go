@@ -22,13 +22,6 @@ type NewTopicInput struct {
 	Name string `json:"name"`
 }
 
-type NewVietnameseInput struct {
-	Word    string  `json:"word"`
-	Meaning *string `json:"meaning,omitempty"`
-	Example *string `json:"example,omitempty"`
-	UserID  int32   `json:"userId"`
-}
-
 type Query struct {
 }
 
@@ -48,19 +41,4 @@ type UpdateEnglishInput struct {
 type UpdateTopicInput struct {
 	ID   int32   `json:"id"`
 	Name *string `json:"name,omitempty"`
-}
-
-type UpdateVietnameseInput struct {
-	Word    string  `json:"word"`
-	Meaning *string `json:"meaning,omitempty"`
-	Example *string `json:"example,omitempty"`
-	UserID  int32   `json:"userId"`
-}
-
-type Vietnamese struct {
-	ID      int32   `json:"id"`
-	Word    string  `json:"word"`
-	Meaning *string `json:"meaning,omitempty"`
-	Example *string `json:"example,omitempty"`
-	UserID  int32   `json:"userId"`
 }

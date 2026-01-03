@@ -31,3 +31,18 @@ func (r *TopicRepository) GetByUserID(ctx context.Context, userId int32) ([]*mod
 	}
 	return topics, nil
 }
+
+func (r *TopicRepository) Search(ctx context.Context, userID int32, name string) ([]*model.Topic, error) {
+	var topics []*model.Topic
+	if err := r.DB.WithContext(ctx).
+		Where(
+			"of_user = ? AND name LIKE ?",
+			userID,
+			"%"+name+"%",
+		).
+		Find(&topics).
+		Error; err != nil {
+		return nil, err
+	}
+	return topics, nil
+}

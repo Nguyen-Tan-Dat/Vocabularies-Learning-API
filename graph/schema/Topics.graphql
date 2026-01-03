@@ -15,6 +15,7 @@ input UpdateTopicInput {
 
 extend type Query {
     getTopics: [Topic!]!
+    searchTopics(key: String!): [Topic!]!
     getTopicById(id: Int!): Topic
 }
 

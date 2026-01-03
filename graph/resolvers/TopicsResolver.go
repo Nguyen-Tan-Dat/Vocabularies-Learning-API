@@ -40,6 +40,15 @@ func (r *queryResolver) GetTopics(ctx context.Context) ([]*model.Topic, error) {
 	return r.TopicService.GetTopics(ctx, userID)
 }
 
+// SearchTopics is the resolver for the searchTopics field.
+func (r *queryResolver) SearchTopics(ctx context.Context, key string) ([]*model.Topic, error) {
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.TopicService.Search(ctx, userID, key)
+}
+
 // GetTopicByID is the resolver for the getTopicById field.
 func (r *queryResolver) GetTopicByID(ctx context.Context, id int32) (*model.Topic, error) {
 	panic(fmt.Errorf("not implemented: GetTopicByID - getTopicById"))
