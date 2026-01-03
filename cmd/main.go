@@ -1,6 +1,10 @@
 package main
 
 import (
+	"log"
+	"net/http"
+	"os"
+
 	"github.com/99designs/gqlgen/graphql/handler"
 	"github.com/99designs/gqlgen/graphql/handler/extension"
 	"github.com/99designs/gqlgen/graphql/handler/lru"
@@ -13,9 +17,6 @@ import (
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/repositories"
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/services"
 	"github.com/vektah/gqlparser/v2/ast"
-	"log"
-	"net/http"
-	"os"
 )
 
 //var db *gorm.DB
@@ -27,7 +28,8 @@ func main() {
 	}
 	db.ConnectDatabase()
 	topicService := services.TopicService{Repo: repositories.TopicRepository{DB: db.GetDB()}}
-	resolver := resolvers.Resolver{TopicService: topicService}
+	englishService := services.EnglishService{Repo: repositories.EnglishRepository{DB: db.GetDB()}}
+	resolver := resolvers.Resolver{TopicService: topicService, EnglishService: englishService}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver}))
 

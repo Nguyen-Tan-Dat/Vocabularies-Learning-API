@@ -3,48 +3,65 @@
 package model
 
 type English struct {
-	ID           int32   `json:"id"`
-	Word         string  `json:"word"`
-	Definition   *string `json:"definition,omitempty"`
-	PartOfSpeech *string `json:"partOfSpeech,omitempty"`
-	Example      *string `json:"example,omitempty"`
-	UserID       int32   `json:"userId"`
+	ID       int32   `json:"id"`
+	Word     string  `json:"word"`
+	Phonetic *string `json:"phonetic,omitempty"`
+	Audio    *string `json:"audio,omitempty"`
 }
 
 type Mutation struct {
 }
 
 type NewEnglishInput struct {
-	Word         string  `json:"word"`
-	Definition   *string `json:"definition,omitempty"`
-	PartOfSpeech *string `json:"partOfSpeech,omitempty"`
-	Example      *string `json:"example,omitempty"`
-	UserID       int32   `json:"userId"`
+	Word     string  `json:"word"`
+	Phonetic *string `json:"phonetic,omitempty"`
+	Audio    *string `json:"audio,omitempty"`
 }
 
-type NewTopic struct {
+type NewTopicInput struct {
 	Name   string `json:"name"`
-	UserID int32  `json:"userId"`
+	OfUser int32  `json:"ofUser"`
+}
+
+type NewVietnameseInput struct {
+	Word    string  `json:"word"`
+	Meaning *string `json:"meaning,omitempty"`
+	Example *string `json:"example,omitempty"`
+	UserID  int32   `json:"userId"`
 }
 
 type Query struct {
 }
 
 type Topic struct {
-	ID     int32  `json:"id"`
+	ID     string `json:"id"`
 	Name   string `json:"name"`
-	UserID int32  `json:"userId"`
+	OfUser int32  `json:"ofUser"`
 }
 
 type UpdateEnglishInput struct {
-	ID           int32   `json:"id"`
-	Word         *string `json:"word,omitempty"`
-	Definition   *string `json:"definition,omitempty"`
-	PartOfSpeech *string `json:"partOfSpeech,omitempty"`
-	Example      *string `json:"example,omitempty"`
+	ID       int32   `json:"id"`
+	Word     *string `json:"word,omitempty"`
+	Phonetic *string `json:"phonetic,omitempty"`
+	Audio    *string `json:"audio,omitempty"`
 }
 
 type UpdateTopicInput struct {
-	ID   int32   `json:"id"`
+	ID   string  `json:"id"`
 	Name *string `json:"name,omitempty"`
+}
+
+type UpdateVietnameseInput struct {
+	Word    string  `json:"word"`
+	Meaning *string `json:"meaning,omitempty"`
+	Example *string `json:"example,omitempty"`
+	UserID  int32   `json:"userId"`
+}
+
+type Vietnamese struct {
+	ID      int32   `json:"id"`
+	Word    string  `json:"word"`
+	Meaning *string `json:"meaning,omitempty"`
+	Example *string `json:"example,omitempty"`
+	UserID  int32   `json:"userId"`
 }

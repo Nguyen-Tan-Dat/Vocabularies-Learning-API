@@ -2,6 +2,7 @@ package repositories
 
 import (
 	"context"
+
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/model"
 	"gorm.io/gorm"
 )
@@ -11,7 +12,7 @@ type TopicRepository struct {
 }
 
 func (r *TopicRepository) Create(ctx context.Context, name string, userId int32) (*model.Topic, error) {
-	topic := &model.Topic{Name: name, UserID: userId}
+	topic := &model.Topic{Name: name, OfUser: userId}
 	if err := r.DB.WithContext(ctx).Create(topic).Error; err != nil {
 		return nil, err
 	}
@@ -20,7 +21,7 @@ func (r *TopicRepository) Create(ctx context.Context, name string, userId int32)
 
 func (r *TopicRepository) GetByUserID(ctx context.Context, userId int32) ([]*model.Topic, error) {
 	var topics []*model.Topic
-	if err := r.DB.WithContext(ctx).Where("user_id = ?", userId).Find(&topics).Error; err != nil {
+	if err := r.DB.WithContext(ctx).Where("of_user = ?", userId).Find(&topics).Error; err != nil {
 		return nil, err
 	}
 	return topics, nil

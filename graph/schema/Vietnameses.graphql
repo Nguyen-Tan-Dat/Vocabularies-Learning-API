@@ -1,0 +1,29 @@
+type Vietnamese {
+    id: Int!
+    word: String!
+    meaning: String
+    example: String
+    userId: Int!
+}
+input NewVietnameseInput {
+    word: String!
+    meaning: String
+    example: String
+    userId: Int!
+}
+input UpdateVietnameseInput {
+    word: String!
+    meaning: String
+    example: String
+    userId: Int!
+}
+extend type Mutation {
+    createVietnamese(input: NewVietnameseInput!): Vietnamese!
+    updateVietnamese(input: UpdateVietnameseInput!): Vietnamese!
+    deleteVietnamese(id: Int!): Boolean!
+}
+
+extend type Query {
+    getVietnamese(id: Int!): Vietnamese
+    listVietnamese(userId: Int!): [Vietnamese!]!
+}
