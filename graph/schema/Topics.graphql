@@ -1,23 +1,25 @@
 type Topic {
-    id: ID!
-    name: String!
-    ofUser: Int!
-}
-input NewTopicInput {
+    id: Int!
     name: String!
     ofUser: Int!
 }
 
+input NewTopicInput {
+    name: String!
+}
+
 input UpdateTopicInput {
-    id: ID!
+    id: Int!
     name: String
 }
+
 extend type Query {
     getTopics: [Topic!]!
-    getTopicById(id: ID!): Topic
+    getTopicById(id: Int!): Topic
 }
+
 extend type Mutation {
     createTopic(input: NewTopicInput!): Topic!
     updateTopic(input: UpdateTopicInput!): Topic!
-    deleteTopic(id: ID!): Boolean!
+    deleteTopic(id: Int!): Boolean!
 }

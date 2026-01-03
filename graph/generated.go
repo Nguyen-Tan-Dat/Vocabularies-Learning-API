@@ -59,7 +59,7 @@ type ComplexityRoot struct {
 		CreateTopic      func(childComplexity int, input model.NewTopicInput) int
 		CreateVietnamese func(childComplexity int, input model.NewVietnameseInput) int
 		DeleteEnglish    func(childComplexity int, id int32) int
-		DeleteTopic      func(childComplexity int, id string) int
+		DeleteTopic      func(childComplexity int, id int32) int
 		DeleteVietnamese func(childComplexity int, id int32) int
 		Hello            func(childComplexity int, name string) int
 		UpdateEnglish    func(childComplexity int, input model.UpdateEnglishInput) int
@@ -70,7 +70,7 @@ type ComplexityRoot struct {
 	Query struct {
 		English        func(childComplexity int, id int32) int
 		EnglishList    func(childComplexity int) int
-		GetTopicByID   func(childComplexity int, id string) int
+		GetTopicByID   func(childComplexity int, id int32) int
 		GetTopics      func(childComplexity int) int
 		GetVietnamese  func(childComplexity int, id int32) int
 		Index          func(childComplexity int) int
@@ -100,7 +100,7 @@ type MutationResolver interface {
 	DeleteEnglish(ctx context.Context, id int32) (bool, error)
 	CreateTopic(ctx context.Context, input model.NewTopicInput) (*model.Topic, error)
 	UpdateTopic(ctx context.Context, input model.UpdateTopicInput) (*model.Topic, error)
-	DeleteTopic(ctx context.Context, id string) (bool, error)
+	DeleteTopic(ctx context.Context, id int32) (bool, error)
 	CreateVietnamese(ctx context.Context, input model.NewVietnameseInput) (*model.Vietnamese, error)
 	UpdateVietnamese(ctx context.Context, input model.UpdateVietnameseInput) (*model.Vietnamese, error)
 	DeleteVietnamese(ctx context.Context, id int32) (bool, error)
@@ -111,7 +111,7 @@ type QueryResolver interface {
 	English(ctx context.Context, id int32) (*model.English, error)
 	EnglishList(ctx context.Context) ([]*model.English, error)
 	GetTopics(ctx context.Context) ([]*model.Topic, error)
-	GetTopicByID(ctx context.Context, id string) (*model.Topic, error)
+	GetTopicByID(ctx context.Context, id int32) (*model.Topic, error)
 	GetVietnamese(ctx context.Context, id int32) (*model.Vietnamese, error)
 	ListVietnamese(ctx context.Context, userID int32) ([]*model.Vietnamese, error)
 }
@@ -214,7 +214,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Mutation.DeleteTopic(childComplexity, args["id"].(string)), true
+		return e.complexity.Mutation.DeleteTopic(childComplexity, args["id"].(int32)), true
 	case "Mutation.deleteVietnamese":
 		if e.complexity.Mutation.DeleteVietnamese == nil {
 			break
@@ -298,7 +298,7 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.GetTopicByID(childComplexity, args["id"].(string)), true
+		return e.complexity.Query.GetTopicByID(childComplexity, args["id"].(int32)), true
 	case "Query.getTopics":
 		if e.complexity.Query.GetTopics == nil {
 			break
@@ -570,7 +570,7 @@ func (ec *executionContext) field_Mutation_deleteEnglish_args(ctx context.Contex
 func (ec *executionContext) field_Mutation_deleteTopic_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -658,7 +658,7 @@ func (ec *executionContext) field_Query_english_args(ctx context.Context, rawArg
 func (ec *executionContext) field_Query_getTopicById_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNID2string)
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNInt2int32)
 	if err != nil {
 		return nil, err
 	}
@@ -1146,7 +1146,7 @@ func (ec *executionContext) _Mutation_deleteTopic(ctx context.Context, field gra
 		ec.fieldContext_Mutation_deleteTopic,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Mutation().DeleteTopic(ctx, fc.Args["id"].(string))
+			return ec.resolvers.Mutation().DeleteTopic(ctx, fc.Args["id"].(int32))
 		},
 		nil,
 		ec.marshalNBoolean2bool,
@@ -1519,7 +1519,7 @@ func (ec *executionContext) _Query_getTopicById(ctx context.Context, field graph
 		ec.fieldContext_Query_getTopicById,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetTopicByID(ctx, fc.Args["id"].(string))
+			return ec.resolvers.Query().GetTopicByID(ctx, fc.Args["id"].(int32))
 		},
 		nil,
 		ec.marshalOTopic2ᚖgithubᚗcomᚋNguyenᚑTanᚑDatᚋVocabulariesᚑLearningᚑAPIᚋgraphᚋmodelᚐTopic,
@@ -1784,7 +1784,7 @@ func (ec *executionContext) _Topic_id(ctx context.Context, field graphql.Collect
 			return obj.ID, nil
 		},
 		nil,
-		ec.marshalNID2string,
+		ec.marshalNInt2int32,
 		true,
 		true,
 	)
@@ -1797,7 +1797,7 @@ func (ec *executionContext) fieldContext_Topic_id(_ context.Context, field graph
 		IsMethod:   false,
 		IsResolver: false,
 		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			return nil, errors.New("field of type ID does not have child fields")
+			return nil, errors.New("field of type Int does not have child fields")
 		},
 	}
 	return fc, nil
@@ -3500,7 +3500,7 @@ func (ec *executionContext) unmarshalInputNewTopicInput(ctx context.Context, obj
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"name", "ofUser"}
+	fieldsInOrder := [...]string{"name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3514,13 +3514,6 @@ func (ec *executionContext) unmarshalInputNewTopicInput(ctx context.Context, obj
 				return it, err
 			}
 			it.Name = data
-		case "ofUser":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ofUser"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OfUser = data
 		}
 	}
 
@@ -3639,7 +3632,7 @@ func (ec *executionContext) unmarshalInputUpdateTopicInput(ctx context.Context, 
 		switch k {
 		case "id":
 			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("id"))
-			data, err := ec.unmarshalNID2string(ctx, v)
+			data, err := ec.unmarshalNInt2int32(ctx, v)
 			if err != nil {
 				return it, err
 			}
@@ -4596,22 +4589,6 @@ func (ec *executionContext) marshalNEnglish2ᚖgithubᚗcomᚋNguyenᚑTanᚑDat
 		return graphql.Null
 	}
 	return ec._English(ctx, sel, v)
-}
-
-func (ec *executionContext) unmarshalNID2string(ctx context.Context, v any) (string, error) {
-	res, err := graphql.UnmarshalID(v)
-	return res, graphql.ErrorOnPath(ctx, err)
-}
-
-func (ec *executionContext) marshalNID2string(ctx context.Context, sel ast.SelectionSet, v string) graphql.Marshaler {
-	_ = sel
-	res := graphql.MarshalID(v)
-	if res == graphql.Null {
-		if !graphql.HasFieldError(ctx, graphql.GetFieldContext(ctx)) {
-			graphql.AddErrorf(ctx, "the requested element is null which the schema does not allow")
-		}
-	}
-	return res
 }
 
 func (ec *executionContext) unmarshalNInt2int32(ctx context.Context, v any) (int32, error) {

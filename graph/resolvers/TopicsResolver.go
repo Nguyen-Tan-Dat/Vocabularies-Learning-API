@@ -14,7 +14,11 @@ import (
 
 // CreateTopic is the resolver for the createTopic field.
 func (r *mutationResolver) CreateTopic(ctx context.Context, input model.NewTopicInput) (*model.Topic, error) {
-	panic(fmt.Errorf("not implemented: CreateTopic - createTopic"))
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.TopicService.CreateTopic(ctx, input.Name, userID)
 }
 
 // UpdateTopic is the resolver for the updateTopic field.
@@ -23,7 +27,7 @@ func (r *mutationResolver) UpdateTopic(ctx context.Context, input model.UpdateTo
 }
 
 // DeleteTopic is the resolver for the deleteTopic field.
-func (r *mutationResolver) DeleteTopic(ctx context.Context, id string) (bool, error) {
+func (r *mutationResolver) DeleteTopic(ctx context.Context, id int32) (bool, error) {
 	panic(fmt.Errorf("not implemented: DeleteTopic - deleteTopic"))
 }
 
@@ -37,6 +41,6 @@ func (r *queryResolver) GetTopics(ctx context.Context) ([]*model.Topic, error) {
 }
 
 // GetTopicByID is the resolver for the getTopicById field.
-func (r *queryResolver) GetTopicByID(ctx context.Context, id string) (*model.Topic, error) {
+func (r *queryResolver) GetTopicByID(ctx context.Context, id int32) (*model.Topic, error) {
 	panic(fmt.Errorf("not implemented: GetTopicByID - getTopicById"))
 }

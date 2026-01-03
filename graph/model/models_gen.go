@@ -19,8 +19,7 @@ type NewEnglishInput struct {
 }
 
 type NewTopicInput struct {
-	Name   string `json:"name"`
-	OfUser int32  `json:"ofUser"`
+	Name string `json:"name"`
 }
 
 type NewVietnameseInput struct {
@@ -34,7 +33,7 @@ type Query struct {
 }
 
 type Topic struct {
-	ID     string `json:"id"`
+	ID     int32  `json:"id"`
 	Name   string `json:"name"`
 	OfUser int32  `json:"ofUser"`
 }
@@ -47,7 +46,7 @@ type UpdateEnglishInput struct {
 }
 
 type UpdateTopicInput struct {
-	ID   string  `json:"id"`
+	ID   int32   `json:"id"`
 	Name *string `json:"name,omitempty"`
 }
 

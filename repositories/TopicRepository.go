@@ -12,10 +12,15 @@ type TopicRepository struct {
 }
 
 func (r *TopicRepository) Create(ctx context.Context, name string, userId int32) (*model.Topic, error) {
-	topic := &model.Topic{Name: name, OfUser: userId}
+	topic := &model.Topic{
+		Name:   name,
+		OfUser: userId,
+	}
 	if err := r.DB.WithContext(ctx).Create(topic).Error; err != nil {
 		return nil, err
 	}
+
+	// topic.ID đã được DB sinh
 	return topic, nil
 }
 
