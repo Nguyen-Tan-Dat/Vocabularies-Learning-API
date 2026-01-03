@@ -10,7 +10,8 @@ input NewTopicInput {
 
 input UpdateTopicInput {
     id: Int!
-    name: String
+    name: String!
+    ofUser: Int!
 }
 
 extend type Query {
