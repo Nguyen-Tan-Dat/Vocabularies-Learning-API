@@ -11,13 +11,12 @@ input NewTopicInput {
 input UpdateTopicInput {
     id: Int!
     name: String!
-    ofUser: Int!
 }
 
 extend type Query {
-    getTopics: [Topic!]!
-    searchTopics(key: String!): [Topic!]!
-    getTopicById(id: Int!): Topic
+    topics: [Topic!]!
+    topic(id: Int!): Topic
+    searchTopics(keyword: String!): [Topic!]!
 }
 
 extend type Mutation {

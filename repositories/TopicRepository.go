@@ -29,7 +29,7 @@ func (r *TopicRepository) Update(ctx context.Context, userId int32, input model.
 		Name:   input.Name,
 		OfUser: userId,
 	}
-	if err := r.DB.WithContext(ctx).Create(topic).Error; err != nil {
+	if err := r.DB.WithContext(ctx).Save(topic).Error; err != nil {
 		return nil, err
 	}
 	return topic, nil
@@ -71,4 +71,19 @@ func (r *TopicRepository) Get(ctx context.Context, userID int32, id int32) (*mod
 		return nil, err
 	}
 	return topics, nil
+}
+func (r *TopicRepository) Delete(
+	ctx context.Context,
+	id int,
+) error {
+
+	if err := r.DB.
+		WithContext(ctx).
+		Delete(&model.Topic{}, id).
+		Error; err != nil {
+
+		return err
+	}
+
+	return nil
 }

@@ -28,3 +28,13 @@ func (s *TopicService) Search(ctx context.Context, userId int32, name string) ([
 func (s *TopicService) Get(ctx context.Context, userID int32, id int32) (*model.Topic, error) {
 	return s.Repo.Get(ctx, userID, id)
 }
+func (s *TopicService) Delete(
+	ctx context.Context,
+	id int,
+) error {
+
+	// Nơi này có thể thêm business logic sau
+	// ví dụ: check owner (of_user)
+
+	return s.Repo.Delete(ctx, id)
+}

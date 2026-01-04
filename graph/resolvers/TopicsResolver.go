@@ -7,7 +7,6 @@ package resolvers
 
 import (
 	"context"
-	"fmt"
 
 	"github.com/Nguyen-Tan-Dat/Vocabularies-Learning-API/graph/model"
 )
@@ -32,11 +31,14 @@ func (r *mutationResolver) UpdateTopic(ctx context.Context, input model.UpdateTo
 
 // DeleteTopic is the resolver for the deleteTopic field.
 func (r *mutationResolver) DeleteTopic(ctx context.Context, id int32) (bool, error) {
-	panic(fmt.Errorf("not implemented: DeleteTopic - deleteTopic"))
+	if err := r.TopicService.Delete(ctx, int(id)); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
-// GetTopics is the resolver for the getTopics field.
-func (r *queryResolver) GetTopics(ctx context.Context) ([]*model.Topic, error) {
+// Topics is the resolver for the topics field.
+func (r *queryResolver) Topics(ctx context.Context) ([]*model.Topic, error) {
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
@@ -44,20 +46,20 @@ func (r *queryResolver) GetTopics(ctx context.Context) ([]*model.Topic, error) {
 	return r.TopicService.GetTopics(ctx, userID)
 }
 
-// SearchTopics is the resolver for the searchTopics field.
-func (r *queryResolver) SearchTopics(ctx context.Context, key string) ([]*model.Topic, error) {
-	userID, err := getUserIDFromContext(ctx)
-	if err != nil {
-		return nil, err
-	}
-	return r.TopicService.Search(ctx, userID, key)
-}
-
-// GetTopicByID is the resolver for the getTopicById field.
-func (r *queryResolver) GetTopicByID(ctx context.Context, id int32) (*model.Topic, error) {
+// Topic is the resolver for the topic field.
+func (r *queryResolver) Topic(ctx context.Context, id int32) (*model.Topic, error) {
 	userID, err := getUserIDFromContext(ctx)
 	if err != nil {
 		return nil, err
 	}
 	return r.TopicService.Get(ctx, userID, id)
+}
+
+// SearchTopics is the resolver for the searchTopics field.
+func (r *queryResolver) SearchTopics(ctx context.Context, keyword string) ([]*model.Topic, error) {
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
+		return nil, err
+	}
+	return r.TopicService.Search(ctx, userID, keyword)
 }

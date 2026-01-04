@@ -39,7 +39,6 @@ type UpdateEnglishInput struct {
 }
 
 type UpdateTopicInput struct {
-	ID     int32  `json:"id"`
-	Name   string `json:"name"`
-	OfUser int32  `json:"ofUser"`
+	ID   int32  `json:"id"`
+	Name string `json:"name"`
 }

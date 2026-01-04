@@ -67,10 +67,10 @@ type ComplexityRoot struct {
 	Query struct {
 		English      func(childComplexity int, id int32) int
 		EnglishList  func(childComplexity int) int
-		GetTopicByID func(childComplexity int, id int32) int
-		GetTopics    func(childComplexity int) int
 		Index        func(childComplexity int) int
-		SearchTopics func(childComplexity int, key string) int
+		SearchTopics func(childComplexity int, keyword string) int
+		Topic        func(childComplexity int, id int32) int
+		Topics       func(childComplexity int) int
 		UserID       func(childComplexity int) int
 	}
 
@@ -95,9 +95,9 @@ type QueryResolver interface {
 	UserID(ctx context.Context) (*int32, error)
 	English(ctx context.Context, id int32) (*model.English, error)
 	EnglishList(ctx context.Context) ([]*model.English, error)
-	GetTopics(ctx context.Context) ([]*model.Topic, error)
-	SearchTopics(ctx context.Context, key string) ([]*model.Topic, error)
-	GetTopicByID(ctx context.Context, id int32) (*model.Topic, error)
+	Topics(ctx context.Context) ([]*model.Topic, error)
+	Topic(ctx context.Context, id int32) (*model.Topic, error)
+	SearchTopics(ctx context.Context, keyword string) ([]*model.Topic, error)
 }
 
 type executableSchema struct {
@@ -239,23 +239,6 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 		}
 
 		return e.complexity.Query.EnglishList(childComplexity), true
-	case "Query.getTopicById":
-		if e.complexity.Query.GetTopicByID == nil {
-			break
-		}
-
-		args, err := ec.field_Query_getTopicById_args(ctx, rawArgs)
-		if err != nil {
-			return 0, false
-		}
-
-		return e.complexity.Query.GetTopicByID(childComplexity, args["id"].(int32)), true
-	case "Query.getTopics":
-		if e.complexity.Query.GetTopics == nil {
-			break
-		}
-
-		return e.complexity.Query.GetTopics(childComplexity), true
 	case "Query.index":
 		if e.complexity.Query.Index == nil {
 			break
@@ -272,7 +255,24 @@ func (e *executableSchema) Complexity(ctx context.Context, typeName, field strin
 			return 0, false
 		}
 
-		return e.complexity.Query.SearchTopics(childComplexity, args["key"].(string)), true
+		return e.complexity.Query.SearchTopics(childComplexity, args["keyword"].(string)), true
+	case "Query.topic":
+		if e.complexity.Query.Topic == nil {
+			break
+		}
+
+		args, err := ec.field_Query_topic_args(ctx, rawArgs)
+		if err != nil {
+			return 0, false
+		}
+
+		return e.complexity.Query.Topic(childComplexity, args["id"].(int32)), true
+	case "Query.topics":
+		if e.complexity.Query.Topics == nil {
+			break
+		}
+
+		return e.complexity.Query.Topics(childComplexity), true
 	case "Query.userID":
 		if e.complexity.Query.UserID == nil {
 			break
@@ -528,7 +528,18 @@ func (ec *executionContext) field_Query_english_args(ctx context.Context, rawArg
 	return args, nil
 }
 
-func (ec *executionContext) field_Query_getTopicById_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+func (ec *executionContext) field_Query_searchTopics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
+	var err error
+	args := map[string]any{}
+	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "keyword", ec.unmarshalNString2string)
+	if err != nil {
+		return nil, err
+	}
+	args["keyword"] = arg0
+	return args, nil
+}
+
+func (ec *executionContext) field_Query_topic_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
 	var err error
 	args := map[string]any{}
 	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "id", ec.unmarshalNInt2int32)
@@ -536,17 +547,6 @@ func (ec *executionContext) field_Query_getTopicById_args(ctx context.Context, r
 		return nil, err
 	}
 	args["id"] = arg0
-	return args, nil
-}
-
-func (ec *executionContext) field_Query_searchTopics_args(ctx context.Context, rawArgs map[string]any) (map[string]any, error) {
-	var err error
-	args := map[string]any{}
-	arg0, err := graphql.ProcessArgField(ctx, rawArgs, "key", ec.unmarshalNString2string)
-	if err != nil {
-		return nil, err
-	}
-	args["key"] = arg0
 	return args, nil
 }
 
@@ -1189,14 +1189,14 @@ func (ec *executionContext) fieldContext_Query_englishList(_ context.Context, fi
 	return fc, nil
 }
 
-func (ec *executionContext) _Query_getTopics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+func (ec *executionContext) _Query_topics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
 		ec.OperationContext,
 		field,
-		ec.fieldContext_Query_getTopics,
+		ec.fieldContext_Query_topics,
 		func(ctx context.Context) (any, error) {
-			return ec.resolvers.Query().GetTopics(ctx)
+			return ec.resolvers.Query().Topics(ctx)
 		},
 		nil,
 		ec.marshalNTopic2ᚕᚖgithubᚗcomᚋNguyenᚑTanᚑDatᚋVocabulariesᚑLearningᚑAPIᚋgraphᚋmodelᚐTopicᚄ,
@@ -1205,7 +1205,7 @@ func (ec *executionContext) _Query_getTopics(ctx context.Context, field graphql.
 	)
 }
 
-func (ec *executionContext) fieldContext_Query_getTopics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+func (ec *executionContext) fieldContext_Query_topics(_ context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
 	fc = &graphql.FieldContext{
 		Object:     "Query",
 		Field:      field,
@@ -1226,6 +1226,55 @@ func (ec *executionContext) fieldContext_Query_getTopics(_ context.Context, fiel
 	return fc, nil
 }
 
+func (ec *executionContext) _Query_topic(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
+	return graphql.ResolveField(
+		ctx,
+		ec.OperationContext,
+		field,
+		ec.fieldContext_Query_topic,
+		func(ctx context.Context) (any, error) {
+			fc := graphql.GetFieldContext(ctx)
+			return ec.resolvers.Query().Topic(ctx, fc.Args["id"].(int32))
+		},
+		nil,
+		ec.marshalOTopic2ᚖgithubᚗcomᚋNguyenᚑTanᚑDatᚋVocabulariesᚑLearningᚑAPIᚋgraphᚋmodelᚐTopic,
+		true,
+		false,
+	)
+}
+
+func (ec *executionContext) fieldContext_Query_topic(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
+	fc = &graphql.FieldContext{
+		Object:     "Query",
+		Field:      field,
+		IsMethod:   true,
+		IsResolver: true,
+		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
+			switch field.Name {
+			case "id":
+				return ec.fieldContext_Topic_id(ctx, field)
+			case "name":
+				return ec.fieldContext_Topic_name(ctx, field)
+			case "ofUser":
+				return ec.fieldContext_Topic_ofUser(ctx, field)
+			}
+			return nil, fmt.Errorf("no field named %q was found under type Topic", field.Name)
+		},
+	}
+	defer func() {
+		if r := recover(); r != nil {
+			err = ec.Recover(ctx, r)
+			ec.Error(ctx, err)
+		}
+	}()
+	ctx = graphql.WithFieldContext(ctx, fc)
+	if fc.Args, err = ec.field_Query_topic_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
+		ec.Error(ctx, err)
+		return fc, err
+	}
+	return fc, nil
+}
+
 func (ec *executionContext) _Query_searchTopics(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
 	return graphql.ResolveField(
 		ctx,
@@ -1234,7 +1283,7 @@ func (ec *executionContext) _Query_searchTopics(ctx context.Context, field graph
 		ec.fieldContext_Query_searchTopics,
 		func(ctx context.Context) (any, error) {
 			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().SearchTopics(ctx, fc.Args["key"].(string))
+			return ec.resolvers.Query().SearchTopics(ctx, fc.Args["keyword"].(string))
 		},
 		nil,
 		ec.marshalNTopic2ᚕᚖgithubᚗcomᚋNguyenᚑTanᚑDatᚋVocabulariesᚑLearningᚑAPIᚋgraphᚋmodelᚐTopicᚄ,
@@ -1269,55 +1318,6 @@ func (ec *executionContext) fieldContext_Query_searchTopics(ctx context.Context,
 	}()
 	ctx = graphql.WithFieldContext(ctx, fc)
 	if fc.Args, err = ec.field_Query_searchTopics_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
-		ec.Error(ctx, err)
-		return fc, err
-	}
-	return fc, nil
-}
-
-func (ec *executionContext) _Query_getTopicById(ctx context.Context, field graphql.CollectedField) (ret graphql.Marshaler) {
-	return graphql.ResolveField(
-		ctx,
-		ec.OperationContext,
-		field,
-		ec.fieldContext_Query_getTopicById,
-		func(ctx context.Context) (any, error) {
-			fc := graphql.GetFieldContext(ctx)
-			return ec.resolvers.Query().GetTopicByID(ctx, fc.Args["id"].(int32))
-		},
-		nil,
-		ec.marshalOTopic2ᚖgithubᚗcomᚋNguyenᚑTanᚑDatᚋVocabulariesᚑLearningᚑAPIᚋgraphᚋmodelᚐTopic,
-		true,
-		false,
-	)
-}
-
-func (ec *executionContext) fieldContext_Query_getTopicById(ctx context.Context, field graphql.CollectedField) (fc *graphql.FieldContext, err error) {
-	fc = &graphql.FieldContext{
-		Object:     "Query",
-		Field:      field,
-		IsMethod:   true,
-		IsResolver: true,
-		Child: func(ctx context.Context, field graphql.CollectedField) (*graphql.FieldContext, error) {
-			switch field.Name {
-			case "id":
-				return ec.fieldContext_Topic_id(ctx, field)
-			case "name":
-				return ec.fieldContext_Topic_name(ctx, field)
-			case "ofUser":
-				return ec.fieldContext_Topic_ofUser(ctx, field)
-			}
-			return nil, fmt.Errorf("no field named %q was found under type Topic", field.Name)
-		},
-	}
-	defer func() {
-		if r := recover(); r != nil {
-			err = ec.Recover(ctx, r)
-			ec.Error(ctx, err)
-		}
-	}()
-	ctx = graphql.WithFieldContext(ctx, fc)
-	if fc.Args, err = ec.field_Query_getTopicById_args(ctx, field.ArgumentMap(ec.Variables)); err != nil {
 		ec.Error(ctx, err)
 		return fc, err
 	}
@@ -3088,7 +3088,7 @@ func (ec *executionContext) unmarshalInputUpdateTopicInput(ctx context.Context, 
 		asMap[k] = v
 	}
 
-	fieldsInOrder := [...]string{"id", "name", "ofUser"}
+	fieldsInOrder := [...]string{"id", "name"}
 	for _, k := range fieldsInOrder {
 		v, ok := asMap[k]
 		if !ok {
@@ -3109,13 +3109,6 @@ func (ec *executionContext) unmarshalInputUpdateTopicInput(ctx context.Context, 
 				return it, err
 			}
 			it.Name = data
-		case "ofUser":
-			ctx := graphql.WithPathContext(ctx, graphql.NewPathWithField("ofUser"))
-			data, err := ec.unmarshalNInt2int32(ctx, v)
-			if err != nil {
-				return it, err
-			}
-			it.OfUser = data
 		}
 	}
 
@@ -3370,7 +3363,7 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 			}
 
 			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getTopics":
+		case "topics":
 			field := field
 
 			innerFunc := func(ctx context.Context, fs *graphql.FieldSet) (res graphql.Marshaler) {
@@ -3379,10 +3372,29 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 						ec.Error(ctx, ec.Recover(ctx, r))
 					}
 				}()
-				res = ec._Query_getTopics(ctx, field)
+				res = ec._Query_topics(ctx, field)
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
+				return res
+			}
+
+			rrm := func(ctx context.Context) graphql.Marshaler {
+				return ec.OperationContext.RootResolverMiddleware(ctx,
+					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
+			}
+
+			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
+		case "topic":
+			field := field
+
+			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
+				defer func() {
+					if r := recover(); r != nil {
+						ec.Error(ctx, ec.Recover(ctx, r))
+					}
+				}()
+				res = ec._Query_topic(ctx, field)
 				return res
 			}
 
@@ -3405,25 +3417,6 @@ func (ec *executionContext) _Query(ctx context.Context, sel ast.SelectionSet) gr
 				if res == graphql.Null {
 					atomic.AddUint32(&fs.Invalids, 1)
 				}
-				return res
-			}
-
-			rrm := func(ctx context.Context) graphql.Marshaler {
-				return ec.OperationContext.RootResolverMiddleware(ctx,
-					func(ctx context.Context) graphql.Marshaler { return innerFunc(ctx, out) })
-			}
-
-			out.Concurrently(i, func(ctx context.Context) graphql.Marshaler { return rrm(innerCtx) })
-		case "getTopicById":
-			field := field
-
-			innerFunc := func(ctx context.Context, _ *graphql.FieldSet) (res graphql.Marshaler) {
-				defer func() {
-					if r := recover(); r != nil {
-						ec.Error(ctx, ec.Recover(ctx, r))
-					}
-				}()
-				res = ec._Query_getTopicById(ctx, field)
 				return res
 			}
 
