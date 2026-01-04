@@ -19,8 +19,6 @@ func (r *TopicRepository) Create(ctx context.Context, name string, userId int32)
 	if err := r.DB.WithContext(ctx).Create(topic).Error; err != nil {
 		return nil, err
 	}
-
-	// topic.ID đã được DB sinh
 	return topic, nil
 }
 func (r *TopicRepository) Update(ctx context.Context, userId int32, input model.UpdateTopicInput) (*model.Topic, error) {
@@ -72,18 +70,13 @@ func (r *TopicRepository) Get(ctx context.Context, userID int32, id int32) (*mod
 	}
 	return topics, nil
 }
-func (r *TopicRepository) Delete(
-	ctx context.Context,
-	id int,
-) error {
-
-	if err := r.DB.
-		WithContext(ctx).
-		Delete(&model.Topic{}, id).
-		Error; err != nil {
-
-		return err
+func (r *TopicRepository) Delete(ctx context.Context, userID int32, id int32) bool {
+	topic := &model.Topic{
+		ID:     id,
+		OfUser: userID,
 	}
-
-	return nil
+	if err := r.DB.WithContext(ctx).Delete(topic).Error; err != nil {
+		return false
+	}
+	return true
 }

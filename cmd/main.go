@@ -29,7 +29,11 @@ func main() {
 	db.ConnectDatabase()
 	topicService := services.TopicService{Repo: repositories.TopicRepository{DB: db.GetDB()}}
 	englishService := services.EnglishService{Repo: repositories.EnglishRepository{DB: db.GetDB()}}
-	resolver := resolvers.Resolver{TopicService: topicService, EnglishService: englishService}
+	accountService := services.AccountService{Repo: repositories.AccountRepository{DB: db.GetDB()}}
+	resolver := resolvers.Resolver{
+		TopicService:   topicService,
+		EnglishService: englishService,
+		AccountService: accountService}
 
 	srv := handler.New(graph.NewExecutableSchema(graph.Config{Resolvers: &resolver}))
 

@@ -17,7 +17,7 @@ func (r *mutationResolver) CreateTopic(ctx context.Context, input model.NewTopic
 	if err != nil {
 		return nil, err
 	}
-	return r.TopicService.CreateTopic(ctx, input.Name, userID)
+	return r.TopicService.Create(ctx, input, userID)
 }
 
 // UpdateTopic is the resolver for the updateTopic field.
@@ -31,8 +31,12 @@ func (r *mutationResolver) UpdateTopic(ctx context.Context, input model.UpdateTo
 
 // DeleteTopic is the resolver for the deleteTopic field.
 func (r *mutationResolver) DeleteTopic(ctx context.Context, id int32) (bool, error) {
-	if err := r.TopicService.Delete(ctx, int(id)); err != nil {
+	userID, err := getUserIDFromContext(ctx)
+	if err != nil {
 		return false, err
+	}
+	if r.TopicService.Delete(ctx, userID, id) == false {
+		return false, nil
 	}
 	return true, nil
 }

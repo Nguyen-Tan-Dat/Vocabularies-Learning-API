@@ -2,20 +2,28 @@
 
 package model
 
+type Account struct {
+	ID       int32  `json:"id"`
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	Allocate string `json:"allocate"`
+	OfUser   int32  `json:"ofUser"`
+}
+
 type English struct {
-	ID       int32   `json:"id"`
-	Word     string  `json:"word"`
-	Phonetic *string `json:"phonetic,omitempty"`
-	Audio    *string `json:"audio,omitempty"`
+	ID       int32  `json:"id"`
+	Word     string `json:"word"`
+	Phonetic string `json:"phonetic"`
+	Audio    string `json:"audio"`
 }
 
 type Mutation struct {
 }
 
-type NewEnglishInput struct {
-	Word     string  `json:"word"`
-	Phonetic *string `json:"phonetic,omitempty"`
-	Audio    *string `json:"audio,omitempty"`
+type NewAccountInput struct {
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	Allocate string `json:"allocate"`
 }
 
 type NewTopicInput struct {
@@ -31,11 +39,12 @@ type Topic struct {
 	OfUser int32  `json:"ofUser"`
 }
 
-type UpdateEnglishInput struct {
-	ID       int32   `json:"id"`
-	Word     *string `json:"word,omitempty"`
-	Phonetic *string `json:"phonetic,omitempty"`
-	Audio    *string `json:"audio,omitempty"`
+type UpdateAccountInput struct {
+	ID       int32  `json:"id"`
+	UserName string `json:"userName"`
+	Password string `json:"password"`
+	Allocate string `json:"allocate"`
+	OfUser   int32  `json:"ofUser"`
 }
 
 type UpdateTopicInput struct {

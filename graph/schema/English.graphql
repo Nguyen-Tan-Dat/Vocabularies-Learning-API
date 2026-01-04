@@ -1,0 +1,12 @@
+type English {
+    id: Int!
+    word: String!
+    phonetic: String!
+    audio: String!
+}
+
+
+extend type Query {
+    englishList: [English!]!
+    searchEnglish(word: String!): [English!]!
+}
